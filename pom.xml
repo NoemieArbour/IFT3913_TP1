@@ -1,0 +1,26 @@
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/maven-v4_0_0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>ift3913</groupId>
+    <artifactId>tp1</artifactId>
+    <version>0.1</version>
+
+    <packaging>pom</packaging>
+
+    <name>IFT3913_TP1</name>
+
+    <modules>
+        <module>tloc</module>
+        <module>tassert</module>
+        <module>tls</module>
+        <module>tropcomp</module>
+    </modules>
+
+    <properties>
+        <maven.compiler.source>20</maven.compiler.source>
+        <maven.compiler.target>20</maven.compiler.target>
+    </properties>
+
+</project>
