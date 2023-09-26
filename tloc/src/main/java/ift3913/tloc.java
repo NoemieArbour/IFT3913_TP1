@@ -37,11 +37,17 @@ public class tloc {
 		return count;
 	}
 
-	public static void main(String[] args) throws Exception {
+	public static void main(String[] args) throws Exception{
+        if (args.length != 1) {
+            System.err.println("TLOC must contain 1 argument: java tloc <filename>.java");
+            System.exit(1);
+        }
 		int linesCount = 0;
 		int lineNull = 0;
 		StringBuilder sb = new StringBuilder();
-		Scanner scan = new Scanner(new File("./tloc/src/main/java/ift3913/tloc.java"));
+        String fileName = args[0];
+        Scanner scan = new Scanner(new File(fileName));
+
 		while (scan.hasNextLine()) {
 			linesCount++;
 			String line = scan.nextLine();
@@ -50,6 +56,7 @@ public class tloc {
 			sb.append(line).append('\n');
 		}
 		int commentLineCount = countComment(sb.toString());
-		System.out.println("number of lines not null not comment  :: " + (linesCount - lineNull - commentLineCount));
+		System.out.println(linesCount - lineNull - commentLineCount);
+
 	}
 }
