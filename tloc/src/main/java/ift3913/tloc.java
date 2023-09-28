@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 /**
  * {@link tloc} est un programme qui, étant donné un fichier source d'une classe
  * de test java, calcule la métrique de taille TLOC : nombre de lignes de code
