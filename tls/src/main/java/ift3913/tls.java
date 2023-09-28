@@ -53,7 +53,9 @@ public class tls {
             if (writeOutput) {
                 output = new File(outputPath);
                 try {
-                    if (output.exists()) output.delete();
+                    if (output.exists()) {
+                        if (!output.delete()) System.err.printf("Could not delete the output file %s\n", outputPath);
+                    }
                     if (!output.createNewFile()) {
                         System.err.printf("Could not create the output file %s\n", outputPath);
                     }
