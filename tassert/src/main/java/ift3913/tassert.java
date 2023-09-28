@@ -18,22 +18,21 @@ public class tassert {
         }
 
         String fileName = args[0];
-        int assertCount = countAsserts(fileName);
 
-        System.out.println(assertCount);
+        System.out.println(countAsserts(fileName));
     }
 
-    private static int countAsserts(String fileName) {
+    protected static int countAsserts(String fileName) {
         int count = 0;
 
         try (BufferedReader reader = new BufferedReader(new FileReader(fileName))) {
             String line;
-            Pattern assertPattern = Pattern.compile("(assertTrue|assertFalse|assertEquals|assertNotEquals|" +
-                    "assertArrayEquals|assertNotNull|assertNull|assertSame|assertNotSame|assertThat|assertThrows)(\\()");
+            Pattern assertPattern = Pattern.compile("(assert)(True|False|Equals|NotEquals|" +
+                    "ArrayEquals|NotNull|Null|Same|NotSame|That|Throws)(\\()");
 
-            while((line = reader.readLine()) != null) {
+            while ((line = reader.readLine()) != null) {
                 Matcher matcher = assertPattern.matcher(line);
-                while(matcher.find()) count++;
+                while (matcher.find()) count++;
             }
 
         } catch (IOException e) {

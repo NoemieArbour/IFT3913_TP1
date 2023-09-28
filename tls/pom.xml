@@ -17,4 +17,21 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
+    <dependencies>
+        <dependency>
+            <groupId>ift3913</groupId>
+            <artifactId>tassert</artifactId>
+            <version>0.1</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/src/main/resources/tassert.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>ift3913</groupId>
+            <artifactId>tloc</artifactId>
+            <version>0.1</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/src/main/resources/tloc.jar</systemPath>
+        </dependency>
+    </dependencies>
+
 </project>
