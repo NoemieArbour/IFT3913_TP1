@@ -28,21 +28,48 @@ public class tls {
         String root = args[0];
         File rootFile = new File(root);
 
-        File[] content = rootFile.listFiles(pathname -> {
-            int dotIndex = pathname.getName().lastIndexOf('.');
-            return pathname.isFile() && pathname.getName().substring(dotIndex + 1).compareTo("java") == 0;
-        });
-        assert content != null;
-
-        for (File file : content) {
-            String filePath = file.getPath();
-            String pack = getPackage(file);
-            String className = file.getName().substring(0, file.getName().lastIndexOf('.'));
-            int tloc = ift3913.tloc.computeTLOC(filePath);
-            int tassert = ift3913.tassert.countAsserts(filePath);
-            float tcmp = (float) tloc / tassert;
-            System.out.printf("%s, %s, %s, %d, %d, %f\n", filePath, pack, className, tloc, tassert, tcmp);
+        if (rootFile.isFile()) {
+            int dotIndex = rootFile.getName().lastIndexOf('.');
+            if (rootFile.getName().substring(dotIndex + 1).compareTo("java") == 0) {
+                computeTLS(rootFile);
+            }
         }
+
+        computeTLS(rootFile.getPath());
+
+    }
+
+    protected static void computeTLS(File file) {
+        String filePath = file.getPath();
+        String pack = getPackage(file);
+        String className = file.getName().substring(0, file.getName().lastIndexOf('.'));
+        int tloc = ift3913.tloc.computeTLOC(filePath);
+        int tassert = ift3913.tassert.countAsserts(filePath);
+        float tcmp = (float) tloc / tassert;
+        System.out.printf("%s, %s, %s, %d, %d, %f\n", filePath, pack, className, tloc, tassert, tcmp);
+    }
+
+    protected static void computeTLS(String folderPath) {
+        File folder = new File(folderPath);
+        File[] content = getJavaFiles(folder);
+        File[] subdir = folder.listFiles(File::isDirectory);
+
+        if (content != null) {
+            for (File file : content) {
+                computeTLS(file);
+            }
+        }
+
+        if (subdir != null) {
+            for (File dir : subdir) computeTLS(dir.getPath());
+        }
+    }
+
+    private static File[] getJavaFiles(File folder) {
+        return folder.listFiles(file -> {
+            int dotIndex = file.getName().lastIndexOf('.');
+            return file.isFile() && file.getName().substring(dotIndex + 1).compareTo("java") == 0;
+        });
     }
 
     private static String getPackage(File file) {
