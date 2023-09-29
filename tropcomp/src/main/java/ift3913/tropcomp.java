@@ -1,128 +1,164 @@
 package ift3913;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Collections;
 
-public class tropcomp { 
-    private double threshold1 = 0.01;
-    private double threshold5 = 0.05;
-    private double threshold10 = 0.1;
-    private static String[] tlocDescendingOrder;
-    private static String[] tmcpDescendingOrder;
+public class tropcomp {
 
+    private static ArrayList<String> streamOutTLS = new ArrayList<String>();
+
+    // private static ArrayList<String>[] tlocDescendingOrder;
+    // private static String[] tmcpDescendingOrder;
     public static void main(String[] args) {
         File maindir;
-        switch(args.length){
-            case 0://manquer d'argument
-              printErrorMessage(1);
-            break;
-            case 1:
+        switch (args.length) {
+            case 3: // print output in command lines
                 maindir = new File(args[0]);
-                if(!maindir.exists()){
-                   printErrorMessage(2);
-                }else{
+                if (!maindir.exists()) {
+                    System.err.println("Project not found! Please verify your entry path.");
+                    System.exit(1);
+                } else {
                     System.out.println("\nWorking..........\n");
-                    String[] aStrings = new String[]{"java","-jar","tropcomp/resources/tls.jar", args[0]};
-                    executeJarFile(aStrings);
+                    if (!isNumeric(args[2])) {
+                        System.out.println("\nThreadhold must be a number!\n");
+                        System.exit(1);
+                    } else {
+                        streamOutTLS = executeJarFile(args[1]);
+                        suspectedClasses(args[1], Integer.parseInt(args[2]));
+                    }
                 }
-            break;
-            case 2: // sortir un fichier
-                maindir = new File(args[1]);   
-                if(!maindir.exists()){
-                   printErrorMessage(2);
-                }else{
+                break;
+            case 4:// print output in csv file
+                maindir = new File(args[1]);
+                if (!maindir.exists()) {
+                    System.err.println("Project not found! Please verify your entry path.");
+                    System.exit(1);
+                } else {
+                    // System.out.println("\nWorking..........\n");
+                    // suspectedClasses(2, args[1]);
+
                 }
-            break;
-            default://invalid entry
-                printErrorMessage(3);
-            break;
+                break;
+            default:// invalid entry
+                System.err.println(
+                        "troncomp must contain at least 2 arguments: java troncomp <project_path> <threshold(e.g.1,5,10,20)> OR \n java troncomp -o <output_path.csv> <entry_path>");
+                break;
         }
     }
 
-    private static String suspectedClasses(String tlsOutput){
-        String[] strings = tlsOutput.split("\n");
-        tlocDescendingOrder = strings.clone();
-        tmcpDescendingOrder = strings.clone();
-        tlocDescendingOrder = sort(strings, 3);
-        tmcpDescendingOrder = sort(strings, 5);
+    private static void suspectedClasses(String path, int seuil) {
+        ArrayList<String> tlocDescendingOrder = new ArrayList<>(streamOutTLS);
+        ArrayList<String> tmcpDescendingOrder = new ArrayList<>(streamOutTLS);
+        sort(tlocDescendingOrder, 3);
+        sort(tmcpDescendingOrder, 5);
+        int totalOfClass = streamOutTLS.size();
         System.out.println("%%%%%%%%%%%%%%%%%%%TLOC ");
-        for(int i =0;i<tlocDescendingOrder.length;i++){
-            System.out.println(tlocDescendingOrder[i]);
+        for (int i = 0; i < tlocDescendingOrder.size(); i++) {
+            System.out.println(tlocDescendingOrder.get(i).split(", ")[2]);
+            System.out.print("-- tloc: " + tlocDescendingOrder.get(i).split(", ")[3]);
+            System.out.print("-- tcmp: " + tlocDescendingOrder.get(i).split(", ")[5]);
+            System.out.print("\n");
         }
-        System.out.println("\n\n%%%%%%%%%%%%%%%%%%%TCMP ");
-         for(int i =0;i<tmcpDescendingOrder.length;i++){
-            System.out.println(tmcpDescendingOrder[i]);
+        System.out.println("%%%%%%%%%%%%%%%%%%%TCMP ");
+        for (int i = 0; i < tmcpDescendingOrder.size(); i++) {
+            System.out.println(tmcpDescendingOrder.get(i).split(", ")[2]);
+            System.out.print("-- tloc: " + tmcpDescendingOrder.get(i).split(", ")[3]);
+            System.out.print("-- tcmp: " + tmcpDescendingOrder.get(i).split(", ")[5]);
+            System.out.print("\n");
         }
-        return null;
-    }
-    
-    private static String[] sort(String[] strArr, int idxComp){
-        int n = strArr.length;
-        Double positiveInfinity = Double.POSITIVE_INFINITY;
-        for (int i = 0; i < n-1; i++) {
-            int min_idx = i;
-            for (int j = i+1; j < n; j++){
-                String fst = strArr[j].split(", ")[idxComp];
-                String snd = strArr[min_idx].split(", ")[idxComp];
-            
-                if(idxComp == 3){
-                    if(Integer.parseInt(fst)>Integer.parseInt(snd)){
-                        min_idx = j;
-                    }
-                }else if(idxComp == 5){
-                    Double fst_cv,snd_cv;
-                    fst_cv = (!(isNumeric(fst)))? positiveInfinity : Double.parseDouble(fst);
-                    snd_cv = (!(isNumeric(snd)))? positiveInfinity : Double.parseDouble(snd);
-                    if(fst_cv > snd_cv){
-                        min_idx = j;
-                    }
+
+        System.out.println("%%%%%%%%%%%%%%%%%%%SAMEEE ");
+        int step = streamOutTLS.size() * seuil / 100;
+        System.out.println("############## " + step);
+        System.out.println("############## " + totalOfClass);
+        for (int i = 0; i < step; i++) {
+            String find = tmcpDescendingOrder.get(i).split(", ")[2];
+            for (int j = 0; j < step; j++) {
+                if (find.equals(tlocDescendingOrder.get(j).split(", ")[2])) {
+                    System.out.println(tlocDescendingOrder.get(j));
                 }
             }
-            String temp = strArr[min_idx];
-            strArr[min_idx] = strArr[i];
-            strArr[i] = temp;
+        }
+
+        // if(typeSortie == 1){// printout command line
+
+        // }else { // csv file
+
+        // }
+
+    }
+
+    private static ArrayList<String> sort(ArrayList<String> strArr, int idxComp) {
+        int n = strArr.size();
+
+        Double positiveInfinity = Double.POSITIVE_INFINITY;
+        for (int i = 0; i < n - 1; i++) {
+            int min_idx = i;
+            for (int j = i + 1; j < n; j++) {
+                String fst = strArr.get(j).split(", ")[idxComp];
+                String snd = strArr.get(min_idx).split(", ")[idxComp];
+
+                if (idxComp == 3) {
+                    if (Integer.parseInt(fst) > Integer.parseInt(snd)) {
+                        min_idx = j;
+                    }
+                } else if (idxComp == 5) {
+                    if (!isNumeric(fst) && !isNumeric(snd)) {// if 2 infinity=>check tloc
+                        fst = strArr.get(j).split(", ")[3];
+                        snd = strArr.get(min_idx).split(", ")[3];
+                        if (fst.compareTo(snd) > 0) {
+                            min_idx = j;
+                        }
+                    } else {
+                        Double fst_cv, snd_cv;
+                        fst_cv = (!(isNumeric(fst))) ? positiveInfinity : Double.parseDouble(fst);
+                        snd_cv = (!(isNumeric(snd))) ? positiveInfinity : Double.parseDouble(snd);
+                        if (fst_cv > snd_cv) {
+                            min_idx = j;
+                        }
+                    }
+
+                }
+            }
+            Collections.swap(strArr, i, min_idx);
         }
         return strArr;
     }
- 
-    /**
-     * Print out error message
-    */
-    private static void printErrorMessage(int codeMessage){
-        switch(codeMessage){
-            case 1:
-                System.err.println("troncomp must contain 1 argument: java troncomp <project_path>");
-                System.exit(1);
-            break;
-            case 2:
-                System.err.println("Project not found! Please verify your entry path.");
-                System.exit(1);
-            break;
-            case 3:
-                System.err.println("Invalid argument! Command valide: troncomp -o <output_path.csv> <entry_path>");
-                System.exit(1);
-            break;
+
+    // Inspired
+    // https://stackoverflow.com/questions/1320476/execute-another-jar-in-a-java-program/40544510#40544510
+    private static ArrayList<String> executeJarFile(String path) {
+        ArrayList<String> temp = new ArrayList<>();
+        String[] aStrings = new String[] { "java", "-jar", "tls.jar", path };
+        ProcessBuilder processBuilder = new ProcessBuilder(aStrings);
+        processBuilder.redirectError(new File(Paths.get("extJar_out_put.txt").toString()));
+        processBuilder.redirectInput();
+        try {
+            final Process process = processBuilder.start();
+            String line;
+            InputStream stdout = process.getInputStream();
+            BufferedReader reader = new BufferedReader(new InputStreamReader(stdout));
+            // int count = 0;
+            while ((line = reader.readLine()) != null) {
+                temp.add(line);
+            }
+        } catch (IOException ex) {
+            System.out.println(ex.getMessage());
         }
+        return temp;
     }
-    //Inspired https://stackoverflow.com/questions/1320476/execute-another-jar-in-a-java-program/40544510#40544510
-    private static void executeJarFile(String[] args){
-        try{
-            Process ps=Runtime.getRuntime().exec(args);
-            ps.waitFor();
-            java.io.InputStream is=ps.getInputStream();
-            byte b[]=new byte[is.available()];
-            is.read(b,0,b.length);
-            suspectedClasses(new String(b));
-        }catch(InterruptedException ex){
-            ex.printStackTrace();
-        }catch(IOException ex){
-            ex.printStackTrace();
-        }
-    }
+
     /**
-     * Inspired code https://stackoverflow.com/questions/1102891/how-to-check-if-a-string-is-numeric-in-java
+     * Inspired code
+     * https://stackoverflow.com/questions/1102891/how-to-check-if-a-string-is-numeric-in-java
      */
     public static boolean isNumeric(String str) {
-        return str.matches("-?\\d+(\\.\\d+)?"); 
+        return str.matches("-?\\d+(\\.\\d+)?");
     }
 }
