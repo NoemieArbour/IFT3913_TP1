@@ -1,0 +1,20 @@
+La sortie de tropcomp varie selon le nombre de fichier d'un projet, le seuil et la comparaison des valeurs tloc et tcmp.
+Puisque le seuil représente un pourcentage des fichiers tests et, non, un pourcentage non-acceptable pour une valeur
+tloc ou tassert (des mesures directes de notre système), on peut douter de l'exactitude de la sortie de notre programme.
+
+En effet, puisque tcmp est un calcul utilisant tassert et tloc et non une mesure, il prédit qu'un fichier est problématique
+plutôt que d'utiliser les mesures directes pour trier les résultats. On peut ensuite douter de la qualité de la prédiction
+puisque les valeurs mesurées utilisées dans le calcul de la prédiction ne sont pas nécessairement de bonnes métriques de
+qualité.
+
+De plus, si un fichier a un ratio tcmp élevé (potentiellement pas assez de tests pour le nombre de lignes du fichier),
+mais ne fait pas partie du seuil des plus gros fichiers tloc, il n'est pas pris en compte. Si l'on souhaite inclure les
+fichiers trop gros comme étant trop complexe, il serait mieux de faire l'union des seuils supérieurs pour tloc et tcmp.
+
+Dans tropcomp, un ratio élevé de tcmp signifie que la classe contient peu de tests pour son nombre de lignes ce qui peut
+vouloir dire que la maintenabilité des tests en est affectée, car ceux-ci seraient trop complexe.
+
+De plus, le nombre de ligne tloc n'est pas une bonne mesure de la grosseur ou de la complexité d'un fichier puisque la
+variance de cette valeur est trop grande. En effet, il serait possible d'évaluer deux fichiers du même contenu, l'un sur
+plusieurs lignes et l'autre avec énormément de code de la forme "ligne; ligne; ligne;" sans réelle espace "\n" ou avec
+for loop sur une ligne au lieu de trois.
